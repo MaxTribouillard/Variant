@@ -8,10 +8,47 @@
 
 </head>
 <body>
-    <script>
-        navigator.xr.requestSession('immersive-ar', {
-  requiredFeatures: ['local', 'anchors', 'dom-overlay', 'hit-test'],
-})
-    </script>
+    <canvas id="xr-canvas"></canvas>
+<script>
+    // Wait for Variant to be ready
+    window.launch_ready = async () => {
+      console.log("Variant ready!");
+
+      // Request AR session
+      const session = await navigator.xr.requestSession("immersive-ar", {
+        requiredFeatures: ["local", "hit-test", "anchors", "dom-overlay"],
+        domOverlay: { root: document.body }
+      });
+
+      const canvas = document.getElementById("xr-canvas");
+      const gl = canvas.getContext("webgl", {
+        xrCompatible: true,
+        alpha: true
+      });
+
+      await gl.makeXRCompatible();
+      session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+
+      // Reference space
+      const refSpace = await session.requestReferenceSpace("local");
+
+      session.requestAnimationFrame(function onXRFrame(t, frame) {
+        const pose = frame.getViewerPose(refSpace);
+
+        if (pose) {
+          const layer = session.renderState.baseLayer;
+          gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer);
+
+          // Clear
+          gl.clearColor(0, 0, 0, 0);
+          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+          // 👉 C’est ici que tu intégreras Babylon ou ton rendu custom
+        }
+
+        session.requestAnimationFrame(onXRFrame);
+      });
+    };
+  </script>
 </body>
 </html>
