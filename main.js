@@ -52,13 +52,6 @@ if ("xr" in navigator) {
     if (supported) {
         console.log("supporté")
       //hide "ar-not-supported"
-      document.getElementById("ar-not-supported").style.display = "none";
-      if(init()){
-console.log("on init");
-      }
-        else{
-            console.log("on init pas");
-    }
       init();
     }
     else{
