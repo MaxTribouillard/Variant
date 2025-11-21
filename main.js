@@ -17,6 +17,10 @@ if ("xr" in navigator) {
     }
   });
 }
+else{
+    console.log("Pas bon");
+    
+}
 
 const init = async () => {
   canvas = document.getElementById("renderCanvas");
