@@ -1,3 +1,39 @@
+(function() {
+  const logBox = document.createElement("div");
+  logBox.style.position = "fixed";
+  logBox.style.bottom = "0";
+  logBox.style.left = "0";
+  logBox.style.width = "100%";
+  logBox.style.maxHeight = "50vh";
+  logBox.style.background = "rgba(0,0,0,0.85)";
+  logBox.style.color = "#0f0";
+  logBox.style.fontSize = "12px";
+  logBox.style.overflowY = "auto";
+  logBox.style.padding = "10px";
+  logBox.style.zIndex = "999999";
+  logBox.style.fontFamily = "monospace";
+  document.body.appendChild(logBox);
+
+  const print = (...args) => {
+    logBox.innerHTML += args.join(" ") + "<br>";
+    logBox.scrollTop = logBox.scrollHeight;
+  };
+
+  const originalLog = console.log;
+  const originalErr = console.error;
+  const originalWarn = console.warn;
+
+  console.log = (...args) => { originalLog(...args); print("[LOG]", ...args); };
+  console.error = (...args) => { originalErr(...args); print("[ERR]", ...args); };
+  console.warn = (...args) => { originalWarn(...args); print("[WARN]", ...args); };
+
+  window.onerror = function (msg, url, lineNo, columnNo, error) {
+    print("[ONERROR]", msg, "line:", lineNo, "col:", columnNo);
+  };
+
+  console.log("📢 Console visuelle prête !");
+})();
+
 var engine,
   scene,
   engineMat,
@@ -14,6 +50,7 @@ if ("xr" in navigator) {
     console.log("coucou 2")
   navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
     if (supported) {
+        console.log("supporté")
       //hide "ar-not-supported"
       document.getElementById("ar-not-supported").style.display = "none";
       init();
@@ -27,6 +64,8 @@ if ("xr" in navigator) {
 
 const init = async () => {
   canvas = document.getElementById("renderCanvas");
+  console.log("on init");
+  
 
   engine = new BABYLON.Engine(canvas, true, {
     preserveDrawingBuffer: true,
