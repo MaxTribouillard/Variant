@@ -7,20 +7,23 @@ let placed,
   placeRequest = false;
 let time = 0;
 
+console.log("coucou");
+
 // check for webxr session support
 if ("xr" in navigator) {
+    console.log("coucou 2")
   navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
     if (supported) {
       //hide "ar-not-supported"
       document.getElementById("ar-not-supported").style.display = "none";
       init();
     }
+    else{
+            console.log("pas bon")
+    }
   });
 }
-else{
-    console.log("Pas bon");
-    
-}
+
 
 const init = async () => {
   canvas = document.getElementById("renderCanvas");
