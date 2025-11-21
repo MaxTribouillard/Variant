@@ -63,8 +63,8 @@ if ("xr" in navigator) {
 
 
 const init = async () => {
+    console.log("on init");
   canvas = document.getElementById("renderCanvas");
-  console.log("on init");
   
 
   engine = new BABYLON.Engine(canvas, true, {
