@@ -31,7 +31,7 @@
     print("[ONERROR]", msg, "line:", lineNo, "col:", columnNo);
   };
 
-  console.log("📢 Console visuelle prête !");
+  console.log("consol prête");
 })();
 
 var engine,
@@ -104,13 +104,7 @@ const createScene = async () => {
   // This attaches the camera to the canvas
   camera.attachControl(canvas, true);
 
-  const hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(
-    "/environmentSpecular.env",
-    scene
-  );
-  scene.environmentTexture = hdrTexture;
-
-  scene.environmenTexture = null;
+  scene.environmentTexture = null;
   // This creates a light
   var light = new BABYLON.HemisphericLight(
     "light",
@@ -125,7 +119,7 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: true,
+    optionalFeatures: ["hit-test", "dom-overlay"],
   });
 
   //remove VR laser pointers for AR
@@ -137,13 +131,4 @@ const createScene = async () => {
 
   // enable hit test
   const xrTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
-
-  // enable dom overlay
-  const domOverlayFeature = fm.enableFeature(
-    BABYLON.WebXRDomOverlay,
-    "latest",
-    { element: "#overlay" },
-    undefined,
-    false
-  );
 }
