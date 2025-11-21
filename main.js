@@ -133,7 +133,7 @@ const createScene = async () => {
 
 const assetsManager = new BABYLON.AssetsManager(scene);
 
-const meshTask = assetsManager.addMeshTask("loadGLB", "", "model/", "model.glb");
+const meshTask = assetsManager.addMeshTask("loadGLB", "", "", "model.glb");
 
         meshTask.onSuccess = function(task) {
             
