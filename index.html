@@ -1,54 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Variant Launch</title>
-    <script src="https://launchar.app/sdk/v1?key=6a59320Dz0LvGovw5MBH0PZvLkDqJt8X&redirect=true"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+  <title>Variant AR Debug</title>
 
+  <!-- Variant SDK -->
+  <script src="https://launchar.app/sdk/v1?key=6a59320Dz0LvGovw5MBH0PZvLkDqJt8X&redirect=true"></script>
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+    }
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+  </style>
 </head>
+
 <body>
-    <canvas id="xr-canvas"></canvas>
+
+<canvas id="xr-canvas"></canvas>
+
+<!-- 🟩 CONSOLE VISUELLE POUR IPHONE -->
 <script>
-    // Wait for Variant to be ready
-    window.launch_ready = async () => {
-      console.log("Variant ready!");
+(function() {
+  const logBox = document.createElement("div");
+  logBox.style.position = "fixed";
+  logBox.style.bottom = "0";
+  logBox.style.left = "0";
+  logBox.style.width = "100%";
+  logBox.style.maxHeight = "50vh";
+  logBox.style.background = "rgba(0,0,0,0.85)";
+  logBox.style.color = "#0f0";
+  logBox.style.fontSize = "12px";
+  logBox.style.overflowY = "auto";
+  logBox.style.padding = "10px";
+  logBox.style.zIndex = "999999";
+  logBox.style.fontFamily = "monospace";
+  document.body.appendChild(logBox);
 
-      // Request AR session
-      const session = await navigator.xr.requestSession("immersive-ar", {
-        requiredFeatures: ["local", "hit-test", "anchors", "dom-overlay"],
-        domOverlay: { root: document.body }
-      });
+  const print = (...args) => {
+    logBox.innerHTML += args.join(" ") + "<br>";
+    logBox.scrollTop = logBox.scrollHeight;
+  };
 
-      const canvas = document.getElementById("xr-canvas");
-      const gl = canvas.getContext("webgl", {
-        xrCompatible: true,
-        alpha: true
-      });
+  const originalLog = console.log;
+  const originalErr = console.error;
+  const originalWarn = console.warn;
 
-      await gl.makeXRCompatible();
-      session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+  console.log = (...args) => { originalLog(...args); print("[LOG]", ...args); };
+  console.error = (...args) => { originalErr(...args); print("[ERR]", ...args); };
+  console.warn = (...args) => { originalWarn(...args); print("[WARN]", ...args); };
 
-      // Reference space
-      const refSpace = await session.requestReferenceSpace("local");
+  window.onerror = function (msg, url, lineNo, columnNo, error) {
+    print("[ONERROR]", msg, "line:", lineNo, "col:", columnNo);
+  };
 
-      session.requestAnimationFrame(function onXRFrame(t, frame) {
-        const pose = frame.getViewerPose(refSpace);
+  console.log("📢 Console visuelle prête !");
+})();
+</script>
 
-        if (pose) {
-          const layer = session.renderState.baseLayer;
-          gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer);
+<script>
+console.log("📂 Script AR chargé");
 
-          // Clear
-          gl.clearColor(0, 0, 0, 0);
-          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+// ⚠️ Variant appelle cette fonction automatiquement quand WebXR est prêt
+window.launch_ready = async () => {
+  console.log("🚀 launch_ready déclenché (Variant prêt)");
 
-          // 👉 C’est ici que tu intégreras Babylon ou ton rendu custom
-        }
+  // Vérifier si WebXR a été injecté
+  if (!navigator.xr) {
+    console.error("❌ navigator.xr est NULL → WebXR non injecté");
+    console.error("👉 Soit Variant n’a pas démarré, soit l’App Clip n’a pas été lancé");
+    return;
+  }
 
-        session.requestAnimationFrame(onXRFrame);
-      });
+  console.log("✅ navigator.xr détecté");
+
+  try {
+    console.log("📡 Demande de session immersive-ar…");
+
+    const session = await navigator.xr.requestSession("immersive-ar", {
+      requiredFeatures: ["local", "hit-test", "anchors"],
+    });
+
+    console.log("🟢 Session AR démarrée !");
+
+    const canvas = document.getElementById("xr-canvas");
+
+    // Initialisation WebGL compatible XR
+    console.log("🎨 Initialisation WebGL…");
+    const gl = canvas.getContext("webgl", { xrCompatible: true });
+
+    if (!gl) {
+      console.error("❌ Impossible d’obtenir un contexte WebGL !");
+      return;
+    }
+
+    console.log("✅ WebGL OK");
+
+    await gl.makeXRCompatible();
+    console.log("🎯 XR compatible OK");
+
+    session.updateRenderState({
+      baseLayer: new XRWebGLLayer(session, gl),
+    });
+
+    console.log("🧭 Demande du referenceSpace…");
+
+    const referenceSpace = await session.requestReferenceSpace("local");
+    console.log("📌 referenceSpace OK");
+
+    // 🔁 LOOP XR
+    const onXRFrame = (time, frame) => {
+      const pose = frame.getViewerPose(referenceSpace);
+
+      if (!pose) {
+        console.warn("⚠️ Aucun viewer pose (pas encore suivi)");
+      }
+
+      const glLayer = session.renderState.baseLayer;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
+
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      session.requestAnimationFrame(onXRFrame);
     };
-  </script>
+
+    console.log("🎬 Démarrage du render loop");
+    session.requestAnimationFrame(onXRFrame);
+
+  } catch (err) {
+    console.error("💥 ERREUR requestSession :", err);
+  }
+};
+</script>
+
 </body>
 </html>
