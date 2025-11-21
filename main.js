@@ -130,4 +130,19 @@ const createScene = async () => {
 
   // enable hit test
   const xrTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
+
+const assetsManager = new BABYLON.AssetsManager(scene);
+
+const meshTask = assetsManager.addMeshTask("loadGLB", "", "model/", "model.glb");
+
+        meshTask.onSuccess = function(task) {
+            
+        };
+
+        meshTask.onError = function(task, message) {
+            console.error("Erreur de GLB:", message);
+        };
+
+        assetsManager.load();
+
 }
