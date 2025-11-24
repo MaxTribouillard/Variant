@@ -135,16 +135,6 @@ const createScene = async () => {
 const assetsManager = new BABYLON.AssetsManager(scene);
 
 
-const meshTask = assetsManager.addMeshTask("loadGLB", "", "assets/", "model.glb");
-
-        meshTask.onSuccess = function(task) {
-            
-        };
-
-        meshTask.onError = function(task, message) {
-            console.error("Erreur de GLB:", message);
-        };
-
-        assetsManager.load();
+BABYLON.AppendSceneAsync("assets/model.glb", scene)
 
 }
