@@ -1,7 +1,7 @@
 (function() {
   const logBox = document.createElement("div");
   logBox.style.position = "fixed";
-  logBox.style.bottom = "0";
+  logBox.style.top = "0";
   logBox.style.left = "0";
   logBox.style.width = "100%";
   logBox.style.maxHeight = "50vh";
