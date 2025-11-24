@@ -62,9 +62,10 @@ if ("xr" in navigator) {
 
 
 const init = async () => {
-    
+  
   canvas = document.getElementById("renderCanvas");
   
+  console.log(fetch("/assets/model.glb").then(r => console.log(r.headers.get("content-type"))));
 
   engine = new BABYLON.Engine(canvas, true, {
     preserveDrawingBuffer: true,
@@ -132,6 +133,7 @@ const createScene = async () => {
   const xrTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
 
 const assetsManager = new BABYLON.AssetsManager(scene);
+
 
 const meshTask = assetsManager.addMeshTask("loadGLB", "", "assets/", "model.glb");
 
