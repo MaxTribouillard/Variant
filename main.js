@@ -137,4 +137,7 @@ const assetsManager = new BABYLON.AssetsManager(scene);
 
 BABYLON.AppendSceneAsync("assets/model.glb", scene)
 
+console.log(scene.meshes);
+
+
 }
