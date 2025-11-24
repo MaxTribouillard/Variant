@@ -134,21 +134,8 @@ const createScene = async () => {
 
 const assetsManager = new BABYLON.AssetsManager(scene);
 
-
-const load = await BABYLON.SceneLoader.ImportMeshAsync(
-    "",
-    "assets/",
-    "model.glb",
-    scene
-  );
-
-  let model = load.meshes[0];
-
-  const meshParent = new BABYLON.Mesh("meshParent", scene);
-  model.parent = meshParent;
-
-  model.position.z = -5
-  meshParent.position.z = -5
-
+var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
+box.position.y = 1;
+box.position.z = 5;
 
 }
