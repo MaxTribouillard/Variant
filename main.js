@@ -158,11 +158,16 @@ const createScene = async () => {
 
   
 
-  let button = document.createElement("button")
-  button.textContent = "ANCHOR"
-  button.style.bottom = 0;
-  button.style.left = 0;
-  canvas.appendChild(button)
+  var button = document.createElement("button");
+    button.style.bottom = "0px";
+    button.style.right = "30px";
+    button.textContent = "click";
+    button.style.width = "100px"
+    button.style.height = "50px"
+
+    button.setAttribute = ("id", "but");
+    button.style.position = "absolute";
+	button.style.color = "black";
 
   button.addEventListener("click", () => {
     anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
