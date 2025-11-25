@@ -133,8 +133,7 @@ const createScene = async () => {
   const hitTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
   const anchorSystem = fm.enableFeature(
     BABYLON.WebXRAnchorSystem,
-    "latest",
-    { doNotRemoveAnchorsOnSessionEnded: true }
+    "latest"
   );
 
   let lastHitTest;
@@ -161,6 +160,8 @@ const createScene = async () => {
 
   let button = document.createElement("button")
   button.textContent = "ANCHOR"
+  button.style.bottom = 0;
+  button.style.left = 0;
 
   button.addEventListener("click", () => {
     anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
