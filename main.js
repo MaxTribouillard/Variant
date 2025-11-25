@@ -137,18 +137,23 @@ var box = BABYLON.MeshBuilder.CreateBox("box", {size: 0.5}, scene);
 box.rotationQuaternion = new BABYLON.Quaternion();
 box.isVisible = false
 
+const dot = BABYLON.SphereBuilder.CreateSphere(
+  "dot",
+  {
+    diameter: 0.05,
+  },
+  scene,
+);
+dot.isVisible = false;
 hitTest.onHitTestResultObservable.add((results) => {
-  
   if (results.length) {
-    
+    dot.isVisible = true;
     box.isVisible = true
     results[0].transformationMatrix.decompose(box.scaling, box.rotationQuaternion, box.position);
     lastHitTest = results[0]
-
   } else {
-  
+    dot.isVisible = false;
     box.isVisible = true
-
   }
 });
 
@@ -161,8 +166,8 @@ box.parent = root;
   })
 
   scene.onPointerDown = (evt, pickInfo) => {
-    if(lastHitTest && anchors) {
-      anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest)
+    if(hitTest && anchors) {
+      anchorSystem.addAnchorPointUsingHitTestResultAsync(hitTest)
     }
   }
 
