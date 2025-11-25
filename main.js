@@ -160,14 +160,12 @@ hitTest.onHitTestResultObservable.add((results) => {
 
 
   anchorSystem.onAnchorAddedObservable.add(anchor => {
-    anchor.attachedNode = root;
+    anchor.attachedNode = box;
   })
-
-  scene.onPointerDown = (evt, pickInfo) => {
-    if(hitTest && anchors) {
-      
-    }
-  }
+    
+  document.addEventListener("pointerdown", () => {
+    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+  })
 
 
 
