@@ -143,7 +143,6 @@ const createScene = async () => {
 
   var box = BABYLON.MeshBuilder.CreateBox("box", { size: 0.5 }, scene);
   box.rotationQuaternion = new BABYLON.Quaternion();
-  box.isVisible = false;
 
   hitTest.onHitTestResultObservable.add((results) => {
     if (results.length) {
