@@ -117,7 +117,7 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: ['hit-test']
+    optionalFeatures: ['hit-test', 'anchors']
   });
 
   //remove VR laser pointers for AR
@@ -129,8 +129,9 @@ const createScene = async () => {
 
   // enable hit test
   const hitTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
+  const anchorSystem = fm.enableFeature(BABYLON.WebXRAnchorSystem, "latest", { doNotRemoveAnchorsOnSessionEnded: true });
 
-const assetsManager = new BABYLON.AssetsManager(scene);
+  let lastHitTest;
 
 var box = BABYLON.MeshBuilder.CreateBox("box", {size: 0.5}, scene);
 box.rotationQuaternion = new BABYLON.Quaternion();
@@ -149,10 +150,21 @@ hitTest.onHitTestResultObservable.add((results) => {
     dot.isVisible = true;
     box.isVisible = true
     results[0].transformationMatrix.decompose(box.scaling, box.rotationQuaternion, box.position);
+    lastHitTest = results[0]
   } else {
     dot.isVisible = false;
     box.isVisible = true
   }
 });
+
+document.addEventListener("click",async () => {
+    if (!lastHitTest) return;
+
+    const anchor = await anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+
+    // Attach mesh to anchor
+    anchor.attachedNode = box;
+})
+
 
 }
