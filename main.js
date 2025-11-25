@@ -135,7 +135,7 @@ const assetsManager = new BABYLON.AssetsManager(scene);
 const result = await BABYLON.ImportMeshAsync("assets/veranda.glb", scene);
 let veranda = result.meshes[0];
 veranda.position.y = 1;
-veranda.position.x = 5;
+veranda.position.z = 5;
 
 // var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
 // box.position.y = 1;
