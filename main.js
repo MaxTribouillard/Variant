@@ -162,6 +162,7 @@ const createScene = async () => {
   button.textContent = "ANCHOR"
   button.style.bottom = 0;
   button.style.left = 0;
+  canvas.appendChild(button)
 
   button.addEventListener("click", () => {
     anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
