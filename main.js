@@ -133,7 +133,8 @@ const createScene = async () => {
 const assetsManager = new BABYLON.AssetsManager(scene);
 
 let veranda = BABYLON.ImpotMeshAsync("assets/veranda.glb", scene);
-console.log(veranda.position)
+veranda.position.y = 1
+veranda.position.z = 5
 
 var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
 box.position.y = 1;
