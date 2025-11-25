@@ -169,11 +169,11 @@ const createScene = async () => {
   //   button.style.position = "absolute";
 	// button.style.color = "black";
 
-  document.addEventListener("volumechange", () => {
-    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+  // document.addEventListener("volumechange", () => {
+  //   anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
 
-    anchorSystem.onAnchorAddedObservable.add((anchor) => {
-    anchor.attachedNode = box;
-  });
-  });
+  //   anchorSystem.onAnchorAddedObservable.add((anchor) => {
+  //   anchor.attachedNode = box;
+  // });
+  // });
 };
