@@ -160,14 +160,17 @@ hitTest.onHitTestResultObservable.add((results) => {
 const root = new BABYLON.TransformNode("root", scene);
 box.parent = root;
 
-document.addEventListener('touchend',async () => {
-    if (!lastHitTest) return;
 
-    const anchor = await anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
-
-    // Attach mesh to anchor
+  anchorSystem.onAnchorAddedObservable.add(anchor => {
     anchor.attachedNode = root;
-})
+  })
+
+  scene.onPointerDown = (evt, pickInfo) => {
+    if(lastHitTest && anchors) {
+      anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest)
+    }
+  }
+
 
 
 }
