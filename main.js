@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const logBox = document.createElement("div");
   logBox.style.position = "fixed";
   logBox.style.top = "0";
@@ -23,9 +23,18 @@
   const originalErr = console.error;
   const originalWarn = console.warn;
 
-  console.log = (...args) => { originalLog(...args); print("[LOG]", ...args); };
-  console.error = (...args) => { originalErr(...args); print("[ERR]", ...args); };
-  console.warn = (...args) => { originalWarn(...args); print("[WARN]", ...args); };
+  console.log = (...args) => {
+    originalLog(...args);
+    print("[LOG]", ...args);
+  };
+  console.error = (...args) => {
+    originalErr(...args);
+    print("[ERR]", ...args);
+  };
+  console.warn = (...args) => {
+    originalWarn(...args);
+    print("[WARN]", ...args);
+  };
 
   window.onerror = function (msg, url, lineNo, columnNo, error) {
     print("[ONERROR]", msg, "line:", lineNo, "col:", columnNo);
@@ -34,35 +43,27 @@
   console.log("console prête");
 })();
 
-var engine,
-  scene,
-  engineMat,
-  mats,
-  canvas = null;
-let placed,
-  placeRequest = false;
+var engine, scene, engineMat, mats, canvas = null;
+let placed, placeRequest = false;
 let time = 0;
 
 // check for webxr session support
 if ("xr" in navigator) {
-    console.log("coucou 2")
+  console.log("coucou 2");
   navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
     if (supported) {
-        console.log("supporté")
-      //hide "ar-not-supported"
+      console.log("supporté");
+      // hide "ar-not-supported"
       init();
-    }
-    else{
-            console.log("pas supporté")
+    } else {
+      console.log("pas supporté");
     }
   });
 }
 
-
 const init = async () => {
-  
   canvas = document.getElementById("renderCanvas");
-  
+
   console.log(fetch("/assets/model.glb").then(r => console.log(r.headers.get("content-type"))));
 
   engine = new BABYLON.Engine(canvas, true, {
@@ -103,6 +104,7 @@ const createScene = async () => {
   camera.attachControl(canvas, true);
 
   scene.environmentTexture = null;
+
   // This creates a light
   var light = new BABYLON.HemisphericLight(
     "light",
@@ -117,10 +119,10 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: ['hit-test', 'anchors']
+    optionalFeatures: ["hit-test", "anchors"],
   });
 
-  //remove VR laser pointers for AR
+  // remove VR laser pointers for AR
   xr.pointerSelection.displayLaserPointer = false;
   xr.pointerSelection.displaySelectionMesh = false;
 
@@ -129,50 +131,39 @@ const createScene = async () => {
 
   // enable hit test
   const hitTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
-  const anchorSystem = fm.enableFeature(BABYLON.WebXRAnchorSystem, "latest", { doNotRemoveAnchorsOnSessionEnded: true });
+  const anchorSystem = fm.enableFeature(
+    BABYLON.WebXRAnchorSystem,
+    "latest",
+    { doNotRemoveAnchorsOnSessionEnded: true }
+  );
 
   let lastHitTest;
 
   const root = new BABYLON.TransformNode("root", scene);
 
-var box = BABYLON.MeshBuilder.CreateBox("box", {size: 0.5}, scene);
-box.rotationQuaternion = new BABYLON.Quaternion();
-box.isVisible = false
-box.parent = root;
+  var box = BABYLON.MeshBuilder.CreateBox("box", { size: 0.5 }, scene);
+  box.rotationQuaternion = new BABYLON.Quaternion();
+  box.isVisible = false;
+  box.parent = root;
 
+  hitTest.onHitTestResultObservable.add((results) => {
+    if (results.length) {
+      results[0].transformationMatrix.decompose(
+        root.scaling,
+        root.rotationQuaternion,
+        root.position
+      );
+      lastHitTest = results[0];
+    } else {
+      // no results
+    }
+  });
 
-const dot = BABYLON.SphereBuilder.CreateSphere(
-  "dot",
-  {
-    diameter: 0.05,
-  },
-  scene,
-);
-dot.isVisible = false;
-hitTest.onHitTestResultObservable.add((results) => {
-  if (results.length) {
-    dot.isVisible = true;
-    box.isVisible = true
-    results[0].transformationMatrix.decompose(root.scaling,
-      root.rotationQuaternion,
-      root.position);
-    lastHitTest = results[0]
-  } else {
-    dot.isVisible = false;
-    box.isVisible = true
-  }
-});
+  // anchorSystem.onAnchorAddedObservable.add((anchor) => {
+  //   anchor.attachedNode = root;
+  // });
 
-
-
-  anchorSystem.onAnchorAddedObservable.add(anchor => {
-    anchor.attachedNode = box;
-  })
-    
-  document.addEventListener("pointerdown", () => {
-    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
-  })
-
-
-
-}
+  // document.addEventListener("pointerdown", () => {
+  //   anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+  // });
+};
