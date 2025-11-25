@@ -157,8 +157,6 @@ hitTest.onHitTestResultObservable.add((results) => {
   }
 });
 
-const root = new BABYLON.TransformNode("root", scene);
-box.parent = root;
 
 
   anchorSystem.onAnchorAddedObservable.add(anchor => {
@@ -167,7 +165,7 @@ box.parent = root;
 
   scene.onPointerDown = (evt, pickInfo) => {
     if(hitTest && anchors) {
-      anchorSystem.addAnchorPointUsingHitTestResultAsync(hitTest)
+      
     }
   }
 
