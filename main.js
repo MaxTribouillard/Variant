@@ -157,11 +157,16 @@ const createScene = async () => {
     }
   });
 
-  anchorSystem.onAnchorAddedObservable.add((anchor) => {
+  
+
+  let button = document.createElement("button")
+  button.textContent = "ANCHOR"
+
+  button.addEventListener("click", () => {
+    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+
+    anchorSystem.onAnchorAddedObservable.add((anchor) => {
     anchor.attachedNode = box;
   });
-
-  document.addEventListener("pointerdown", () => {
-    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
   });
 };
