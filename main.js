@@ -117,7 +117,7 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: true
+    optionalFeatures: ['hit-test']
   });
 
   //remove VR laser pointers for AR
@@ -133,8 +133,7 @@ const createScene = async () => {
 const assetsManager = new BABYLON.AssetsManager(scene);
 
 var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
-box.position.y = 1;
-box.position.z = 5
+box.rotationQuaternion = new BABYLON.Quaternion();
 
 const dot = BABYLON.SphereBuilder.CreateSphere(
   "dot",
