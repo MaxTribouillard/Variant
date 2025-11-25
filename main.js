@@ -157,13 +157,16 @@ hitTest.onHitTestResultObservable.add((results) => {
   }
 });
 
-document.addEventListener("click",async () => {
+const root = new BABYLON.TransformNode("root", scene);
+box.parent = root;
+
+document.addEventListener('touchend',async () => {
     if (!lastHitTest) return;
 
     const anchor = await anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
 
     // Attach mesh to anchor
-    anchor.attachedNode = box;
+    anchor.attachedNode = root;
 })
 
 
