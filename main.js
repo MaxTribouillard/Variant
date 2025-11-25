@@ -132,8 +132,21 @@ const createScene = async () => {
 
 const assetsManager = new BABYLON.AssetsManager(scene);
 
-var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
-box.position.y = 1;
-box.position.z = 5;
+const dot = BABYLON.SphereBuilder.CreateSphere(
+  "dot",
+  {
+    diameter: 0.05,
+  },
+  scene,
+);
+dot.isVisible = false;
+hitTest.onHitTestResultObservable.add((results) => {
+  if (results.length) {
+    dot.isVisible = true;
+    results[0].transformationMatrix.decompose(dot.scaling, dot.rotationQuaternion, dot.position);
+  } else {
+    dot.isVisible = false;
+  }
+});
 
 }
