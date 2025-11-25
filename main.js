@@ -31,7 +31,7 @@
     print("[ONERROR]", msg, "line:", lineNo, "col:", columnNo);
   };
 
-  console.log("consol prête");
+  console.log("console prête");
 })();
 
 var engine,
@@ -43,8 +43,6 @@ let placed,
   placeRequest = false;
 let time = 0;
 
-console.log("coucou");
-
 // check for webxr session support
 if ("xr" in navigator) {
     console.log("coucou 2")
@@ -55,7 +53,7 @@ if ("xr" in navigator) {
       init();
     }
     else{
-            console.log("pas bon")
+            console.log("pas supporté")
     }
   });
 }
@@ -119,7 +117,7 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: ["hit-test", "dom-overlay"],
+    optionalFeatures: ["hit-test", "dom-overlay", "anchors"],
   });
 
   //remove VR laser pointers for AR
@@ -133,6 +131,9 @@ const createScene = async () => {
   const xrTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
 
 const assetsManager = new BABYLON.AssetsManager(scene);
+
+let veranda = BABYLON.ImpotMeshAsync("assets/veranda.glb", scene);
+console.log(veranda.position)
 
 var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
 box.position.y = 1;
