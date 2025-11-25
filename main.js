@@ -132,8 +132,9 @@ const createScene = async () => {
 
 const assetsManager = new BABYLON.AssetsManager(scene);
 
-var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
+var box = BABYLON.MeshBuilder.CreateBox("box", {size: 0.5}, scene);
 box.rotationQuaternion = new BABYLON.Quaternion();
+box.isVisible = false
 
 const dot = BABYLON.SphereBuilder.CreateSphere(
   "dot",
@@ -146,9 +147,11 @@ dot.isVisible = false;
 hitTest.onHitTestResultObservable.add((results) => {
   if (results.length) {
     dot.isVisible = true;
+    box.isVisible = true
     results[0].transformationMatrix.decompose(box.scaling, box.rotationQuaternion, box.position);
   } else {
     dot.isVisible = false;
+    box.isVisible = true
   }
 });
 
