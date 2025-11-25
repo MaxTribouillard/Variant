@@ -157,11 +157,11 @@ const createScene = async () => {
     }
   });
 
-  // anchorSystem.onAnchorAddedObservable.add((anchor) => {
-  //   anchor.attachedNode = root;
-  // });
+  anchorSystem.onAnchorAddedObservable.add((anchor) => {
+    anchor.attachedNode = box;
+  });
 
-  // document.addEventListener("pointerdown", () => {
-  //   anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
-  // });
+  document.addEventListener("pointerdown", () => {
+    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+  });
 };
