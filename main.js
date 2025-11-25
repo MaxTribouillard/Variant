@@ -117,7 +117,7 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: ["hit-test", "dom-overlay", "anchors"],
+    optionalFeatures: true
   });
 
   //remove VR laser pointers for AR
@@ -128,9 +128,13 @@ const createScene = async () => {
   const sm = xr.baseExperience.sessionManager;
 
   // enable hit test
-  const xrTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
+  const hitTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
 
 const assetsManager = new BABYLON.AssetsManager(scene);
+
+var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
+box.position.y = 1;
+box.position.z = 5
 
 const dot = BABYLON.SphereBuilder.CreateSphere(
   "dot",
@@ -143,7 +147,7 @@ dot.isVisible = false;
 hitTest.onHitTestResultObservable.add((results) => {
   if (results.length) {
     dot.isVisible = true;
-    results[0].transformationMatrix.decompose(dot.scaling, dot.rotationQuaternion, dot.position);
+    results[0].transformationMatrix.decompose(box.scaling, box.rotationQuaternion, box.position);
   } else {
     dot.isVisible = false;
   }
