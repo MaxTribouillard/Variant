@@ -158,18 +158,18 @@ const createScene = async () => {
 
   
 
-  var button = document.createElement("button");
-    button.style.bottom = "0px";
-    button.style.right = "30px";
-    button.textContent = "click";
-    button.style.width = "100px"
-    button.style.height = "50px"
+  // var button = document.createElement("button");
+  //   button.style.bottom = "0px";
+  //   button.style.right = "30px";
+  //   button.textContent = "click";
+  //   button.style.width = "100px"
+  //   button.style.height = "50px"
 
-    button.setAttribute = ("id", "but");
-    button.style.position = "absolute";
-	button.style.color = "black";
+  //   button.setAttribute = ("id", "but");
+  //   button.style.position = "absolute";
+	// button.style.color = "black";
 
-  button.addEventListener("click", () => {
+  document.addEventListener("volumechange", () => {
     anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
 
     anchorSystem.onAnchorAddedObservable.add((anchor) => {
