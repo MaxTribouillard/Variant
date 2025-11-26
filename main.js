@@ -92,6 +92,8 @@ const createScene = async () => {
     "latest"
   );
 
+  console.log("test")
+
   let lastHitTest;
   let placed = false;
 
@@ -118,6 +120,74 @@ const createScene = async () => {
     }
   });
 
+    // -----------------------------
+  // HUD CONSOLE
+  // -----------------------------
+  const consolePanel = BABYLON.MeshBuilder.CreatePlane("consolePanel", { width: 0.6, height: 0.35 }, scene);
+
+  const adt = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(consolePanel, 1024, 768, false);
+  adt.background = "black";
+
+  const stack = new BABYLON.GUI.StackPanel();
+  stack.isVertical = true;
+  adt.addControl(stack);
+
+  const scroll = new BABYLON.GUI.ScrollViewer();
+  scroll.width = 1;
+  scroll.height = "640px";
+  scroll.background = "#000";
+  scroll.barColor = "white";
+  scroll.thickness = 3;
+  stack.addControl(scroll);
+
+  const textBlock = new BABYLON.GUI.TextBlock();
+  textBlock.color = "white";
+  textBlock.textWrapping = true;
+  textBlock.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  textBlock.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+  textBlock.fontSize = 28;
+  textBlock.paddingLeft = "10px";
+  textBlock.paddingTop = "10px";
+  scroll.addControl(textBlock);
+
+  // buffer de logs
+  let buffer = [];
+  const maxLines = 200;
+  function renderLogs() {
+    textBlock.text = buffer.join("\n");
+    scroll.verticalBar.value = scroll.verticalBar.maximum; // auto-scroll
+  }
+
+  // override console.log
+  const originalLog = console.log;
+  console.log = (...args) => {
+    originalLog(...args);
+    const line = args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
+    buffer.push(line);
+    if (buffer.length > maxLines) buffer.splice(0, buffer.length - maxLines);
+    renderLogs();
+  };
+
+  // bouton clear
+  const btnClear = BABYLON.GUI.Button.CreateSimpleButton("clearBtn", "Clear");
+  btnClear.width = "160px";
+  btnClear.height = "50px";
+  btnClear.color = "white";
+  btnClear.background = "#333";
+  btnClear.onPointerUpObservable.add(() => { buffer = []; renderLogs(); });
+  stack.addControl(btnClear);
+
+  // -----------------------------
+  // Position HUD : toujours devant la caméra
+  // -----------------------------
+  scene.onBeforeRenderObservable.add(() => {
+    const forward = camera.getForwardRay().direction;
+    const targetPos = camera.position.add(forward.scale(0.6)); // distance ~60cm
+    consolePanel.position.copyFrom(targetPos);
+    consolePanel.lookAt(camera.position, 0, 0, 0);
+  });
+
+  console.log("Console HUD AR initialisée !");
   
 
 //     var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
