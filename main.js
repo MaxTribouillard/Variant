@@ -137,6 +137,7 @@ const createScene = async () => {
   );
 
   let lastHitTest;
+  let placed = false;
 
   const root = new BABYLON.TransformNode("root", scene);
 
@@ -145,13 +146,18 @@ const createScene = async () => {
 
   hitTest.onHitTestResultObservable.add((results) => {
     if (results.length) {
-      results[0].transformationMatrix.decompose(
-        box.scaling,
-        box.rotationQuaternion,
-        box.position
-      );
       lastHitTest = results[0];
-    } else {
+      if(!placed){
+
+        results[0].transformationMatrix.decompose(
+          box.scaling,
+          box.rotationQuaternion,
+          box.position
+        );
+
+      }
+    } 
+    else {
       // no results
     }
   });
@@ -169,11 +175,13 @@ const createScene = async () => {
   //   button.style.position = "absolute";
 	// button.style.color = "black";
 
-  // document.addEventListener("volumechange", () => {
-  //   anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+  document.addEventListener("volumechange", () => {
+  
+    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+    placed = true;
 
-  //   anchorSystem.onAnchorAddedObservable.add((anchor) => {
-  //   anchor.attachedNode = box;
-  // });
-  // });
+    anchorSystem.onAnchorAddedObservable.add((anchor) => {
+    anchor.attachedNode = box;
+  });
+  });
 };
