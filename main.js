@@ -123,7 +123,11 @@ const createScene = async () => {
     // -----------------------------
   // HUD CONSOLE
   // -----------------------------
-  const consolePanel = BABYLON.MeshBuilder.CreatePlane("consolePanel", { width: 0.6, height: 0.35 }, scene);
+const consolePanel = BABYLON.MeshBuilder.CreatePlane("consolePanel", { width: 0.6, height: 0.35 }, scene);
+const mat = new BABYLON.StandardMaterial("matConsole", scene);
+mat.diffuseColor = new BABYLON.Color3(0, 0, 0); // noir
+mat.alpha = 0.5; // semi-transparent
+consolePanel.material = mat;
 
   const adt = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(consolePanel, 1024, 768, false);
   adt.background = "black";
