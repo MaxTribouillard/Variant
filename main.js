@@ -165,24 +165,23 @@ const createScene = async () => {
 
   
 
-  var button = document.createElement("button");
-    button.style.bottom = "0px";
-    button.style.right = "30px";
-    button.textContent = "click";
-    button.style.width = "100px"
-    button.style.height = "50px"
+ var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-    button.setAttribute = ("id", "but");
-    button.style.position = "absolute";
-	button.style.color = "black";
-
-  document.addEventListener("volumechange", () => {
-  
-    anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
-    placed = true;
-
+    var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Click Me");
+    button.width = 0.2;
+    button.height = "40px";
+    button.color = "white";
+    button.background = "green";
+    advancedTexture.addControl(button); 
+    
     anchorSystem.onAnchorAddedObservable.add((anchor) => {
-    anchor.attachedNode = box;
-  });
+          anchor.attachedNode = box;
+    });
+
+    button.onPointerDownObservable.add(function() {
+        
+        placed = true;
+        anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
+    
   });
 };
