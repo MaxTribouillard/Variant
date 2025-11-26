@@ -4,6 +4,57 @@ var engine, scene, engineMat, mats, canvas = null;
 let placed, placeRequest = false;
 let time = 0;
 
+// Console de debug pour WebXR AR
+let arConsole = null;
+
+function initARConsole() {
+  // Créer la console de debug si elle n'existe pas
+  if (!document.getElementById("ar-debug-console")) {
+    const console = document.createElement("div");
+    console.id = "ar-debug-console";
+    console.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 300px;
+      height: 200px;
+      background: rgba(0,0,0,0.8);
+      color: #00ff00;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 5px;
+      padding: 10px;
+      overflow-y: auto;
+      z-index: 999999;
+      display: none;
+      border: 1px solid #333;
+    `;
+    document.body.appendChild(console);
+    arConsole = console;
+  }
+  return arConsole;
+}
+
+function logToAR(message) {
+  if (!arConsole) return;
+  const timestamp = new Date().toLocaleTimeString();
+  arConsole.innerHTML += `[${timestamp}] ${message}<br>`;
+  arConsole.scrollTop = arConsole.scrollHeight;
+}
+
+function showARConsole() {
+  if (arConsole) {
+    arConsole.style.display = "block";
+    logToAR("Console AR activée");
+  }
+}
+
+function hideARConsole() {
+  if (arConsole) {
+    arConsole.style.display = "none";
+  }
+}
+
 // check for webxr session support
 if ("xr" in navigator) {
   console.log("coucou 2");
@@ -20,6 +71,9 @@ if ("xr" in navigator) {
 
 const init = async () => {
   canvas = document.getElementById("renderCanvas");
+
+  // Initialiser la console AR
+  initARConsole();
 
   engine = new BABYLON.Engine(canvas, true, {
     preserveDrawingBuffer: true,
@@ -75,7 +129,7 @@ const createScene = async () => {
       sessionMode: "immersive-ar",
     },
     optionalFeatures: ["hit-test", "anchors", "dom-overlay"],
-    domOverlay: {root: document.body}
+    domOverlay: { root: document.body }
   });
 
   // remove VR laser pointers for AR
@@ -120,57 +174,82 @@ const createScene = async () => {
     }
   });
 
-// ---- DOM OVERLAY CONSOLE ----
-const consoleEl = document.getElementById("xr-console");
-const logEl = document.getElementById("xr-log");
-const clearBtn = document.getElementById("xr-clear");
+  // ---- DOM OVERLAY CONSOLE ----
+  // Vérifier que les éléments DOM existent
+  const consoleEl = document.getElementById("xr-console");
+  const logEl = document.getElementById("xr-log");
+  const clearBtn = document.getElementById("xr-clear");
 
-// afficher l'overlay quand la session AR démarre
-xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
-  consoleEl.style.display = "block";
-});
-// masquer quand la session se termine
-xr.baseExperience.sessionManager.onXRSessionEnded.add(() => {
-  consoleEl.style.display = "none";
-});
-
-// buffer + rendu
-let buffer = [];
-const maxLines = 300;
-let pending = false;
-
-function renderLogs() {
-  pending = false;
-  logEl.textContent = buffer.join("\n");
-  // auto-scroll en bas
-  logEl.scrollTop = logEl.scrollHeight;
-}
-
-// patch console.log/warn/error
-const origLog = console.log, origWarn = console.warn, origErr = console.error;
-
-function pushLine(tag, args, color) {
-  const ts = new Date().toISOString().split("T")[1].replace("Z", "");
-  const txt = args.map(a => {
-    try { return typeof a === "object" ? JSON.stringify(a) : String(a); }
-    catch { return String(a); }
-  }).join(" ");
-  buffer.push(`[${ts}] ${tag}: ${txt}`);
-  if (buffer.length > maxLines) buffer.splice(0, buffer.length - maxLines);
-  // throttle pour ne pas rerendre à chaque log
-  if (!pending) {
-    pending = true;
-    requestAnimationFrame(renderLogs);
+  if (!consoleEl || !logEl || !clearBtn) {
+    console.error("Éléments de console manquants dans le DOM");
+    return;
   }
-}
 
-console.log = (...args) => { origLog(...args); pushLine("LOG", args); };
-console.warn = (...args) => { origWarn(...args); pushLine("WARN", args); };
-console.error = (...args) => { origErr(...args); pushLine("ERROR", args); };
+  // buffer + rendu
+  let buffer = [];
+  const maxLines = 300;
+  let pending = false;
 
-clearBtn.addEventListener("click", () => { buffer = []; renderLogs(); });
+  function renderLogs() {
+    pending = false;
+    if (logEl) {
+      logEl.textContent = buffer.join("\n");
+      // auto-scroll en bas
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+  }
 
-console.log("Console AR (DOM overlay) initialisée");
+  // patch console.log/warn/error
+  const origLog = console.log, origWarn = console.warn, origErr = console.error;
+
+  function pushLine(tag, args) {
+    const ts = new Date().toISOString().split("T")[1].replace("Z", "");
+    const txt = args.map(a => {
+      try { 
+        return typeof a === "object" ? JSON.stringify(a) : String(a); 
+      } catch { 
+        return String(a); 
+      }
+    }).join(" ");
+    buffer.push(`[${ts}] ${tag}: ${txt}`);
+    if (buffer.length > maxLines) buffer.splice(0, buffer.length - maxLines);
+    // throttle pour ne pas rerendre à chaque log
+    if (!pending) {
+      pending = true;
+      requestAnimationFrame(renderLogs);
+    }
+  }
+
+  console.log = (...args) => { origLog(...args); pushLine("LOG", args); };
+  console.warn = (...args) => { origWarn(...args); pushLine("WARN", args); };
+  console.error = (...args) => { origErr(...args); pushLine("ERROR", args); };
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => { buffer = []; renderLogs(); });
+  }
+
+  // Gestion des sessions XR
+  xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
+    console.log("Session AR initiée");
+    logToAR("Session WebXR AR démarrée");
+    showARConsole();
+    
+    if (consoleEl) {
+      consoleEl.style.display = "block";
+    }
+  });
+
+  xr.baseExperience.sessionManager.onXRSessionEnded.add(() => {
+    console.log("Session AR terminée");
+    logToAR("Session WebXR AR terminée");
+    hideARConsole();
+    
+    if (consoleEl) {
+      consoleEl.style.display = "none";
+    }
+  });
+
+  console.log("Console AR (DOM overlay) initialisée");
   
 
 //     var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
