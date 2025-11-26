@@ -1,7 +1,7 @@
-(function () {
-  const sendLog = (type, args) => {
-    try {
-      fetch("	https://webhook.site/fa590317-308e-461a-b301-be73de3b96c7", {
+window.addEventListener("load", () => {
+  (function () {
+    const sendLog = (type, args) => {
+      fetch("https://webhook.site/fa590317-308e-461a-b301-be73de3b96c7", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -11,37 +11,18 @@
           userAgent: navigator.userAgent
         }),
       });
-    } catch (e) {
-      console.log(e);
-      
-    }
-  };
+    };
 
-  const originalLog = console.log;
-  const originalErr = console.error;
-  const originalWarn = console.warn;
+    const originalLog = console.log;
+    console.log = (...args) => {
+      originalLog(...args);
+      sendLog("log", args);
+    };
 
-  console.log = (...args) => {
-    originalLog(...args);
-    sendLog("log", args);
-  };
-
-  console.error = (...args) => {
-    originalErr(...args);
-    sendLog("error", args);
-  };
-
-  console.warn = (...args) => {
-    originalWarn(...args);
-    sendLog("warn", args);
-  };
-
-  window.onerror = function (msg, url, line, col) {
-    sendLog("onerror", [msg, url, line, col]);
-  };
-
-  console.log("Logger remote OK");
-})();
+    console.log("Logger started on iOS");
+    console.log("Device UA:", navigator.userAgent);
+  })();
+});
 
 var engine, scene, engineMat, mats, canvas = null;
 let placed, placeRequest = false;
