@@ -72,24 +72,6 @@ const createScene = async () => {
   // Default intensity is 1. Let's dim the light a small amount
   light.intensity = 0.5;
 
-  const plane = BABYLON.MeshBuilder.CreatePlane("logPlane", {width: 1, height: 0.5});
-plane.position = new BABYLON.Vector3(0, 0, 2); // 2 mètres devant la caméra
-
-// Crée un GUI pour le texte
-const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
-const logText = new BABYLON.GUI.TextBlock();
-logText.text = "Logs:\n";
-logText.color = "white";
-logText.fontSize = 20;
-logText.textWrapping = true;
-advancedTexture.addControl(logText);
-
-// Fonction pour ajouter du texte
-function log(message) {
-    console.log(message); // pour desktop si jamais
-    logText.text += message + "\n";
-}
-
   var xr = await scene.createDefaultXRExperienceAsync({
     uiOptions: {
       sessionMode: "immersive-ar",
