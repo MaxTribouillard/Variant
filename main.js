@@ -1,22 +1,17 @@
 (function () {
-  const logBox = document.createElement("div");
-  logBox.style.position = "fixed";
-  logBox.style.top = "0";
-  logBox.style.left = "0";
-  logBox.style.width = "100%";
-  logBox.style.maxHeight = "50vh";
-  logBox.style.background = "rgba(0,0,0,0.85)";
-  logBox.style.color = "#0f0";
-  logBox.style.fontSize = "12px";
-  logBox.style.overflowY = "auto";
-  logBox.style.padding = "10px";
-  logBox.style.zIndex = "999999";
-  logBox.style.fontFamily = "monospace";
-  document.body.appendChild(logBox);
-
-  const print = (...args) => {
-    logBox.innerHTML += args.join(" ") + "<br>";
-    logBox.scrollTop = logBox.scrollHeight;
+  const sendLog = (type, args) => {
+    try {
+      fetch("https://webhook.site/#!/view/fa590317-308e-461a-b301-be73de3b96c7", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          message: args.map(a => (typeof a === "object" ? JSON.stringify(a) : a)),
+          time: new Date().toISOString(),
+          userAgent: navigator.userAgent
+        }),
+      });
+    } catch (e) {}
   };
 
   const originalLog = console.log;
@@ -25,22 +20,24 @@
 
   console.log = (...args) => {
     originalLog(...args);
-    print("[LOG]", ...args);
+    sendLog("log", args);
   };
+
   console.error = (...args) => {
     originalErr(...args);
-    print("[ERR]", ...args);
+    sendLog("error", args);
   };
+
   console.warn = (...args) => {
     originalWarn(...args);
-    print("[WARN]", ...args);
+    sendLog("warn", args);
   };
 
-  window.onerror = function (msg, url, lineNo, columnNo, error) {
-    print("[ONERROR]", msg, "line:", lineNo, "col:", columnNo);
+  window.onerror = function (msg, url, line, col) {
+    sendLog("onerror", [msg, url, line, col]);
   };
 
-  console.log("console prête");
+  console.log("Logger remote OK");
 })();
 
 var engine, scene, engineMat, mats, canvas = null;
