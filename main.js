@@ -119,7 +119,8 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: ["hit-test", "anchors"],
+    optionalFeatures: ["hit-test", "anchors", "dom-overlay"],
+    domOverlay: {root: document.body}
   });
 
   // remove VR laser pointers for AR
@@ -164,16 +165,16 @@ const createScene = async () => {
 
   
 
-  // var button = document.createElement("button");
-  //   button.style.bottom = "0px";
-  //   button.style.right = "30px";
-  //   button.textContent = "click";
-  //   button.style.width = "100px"
-  //   button.style.height = "50px"
+  var button = document.createElement("button");
+    button.style.bottom = "0px";
+    button.style.right = "30px";
+    button.textContent = "click";
+    button.style.width = "100px"
+    button.style.height = "50px"
 
-  //   button.setAttribute = ("id", "but");
-  //   button.style.position = "absolute";
-	// button.style.color = "black";
+    button.setAttribute = ("id", "but");
+    button.style.position = "absolute";
+	button.style.color = "black";
 
   document.addEventListener("volumechange", () => {
   
