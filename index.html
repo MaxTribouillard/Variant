@@ -14,19 +14,14 @@
 <body>
     <canvas id="renderCanvas"></canvas>
 
-    <!-- Console DOM Overlay pour WebXR AR -->
-    <div id="xr-console" style="display:none;">
-      <div id="xr-console-header">
-        <button id="xr-clear">Clear</button>
-        <span id="xr-title">AR Console (DOM Overlay)</span>
+    <!-- Console de debug fixe en bas -->
+    <div id="debug-console">
+      <div id="console-header">
+        <span id="console-title">Debug Console</span>
+        <button id="clear-btn">Clear</button>
       </div>
-      <pre id="xr-log"></pre>
+      <div id="console-content"></div>
     </div>
-
-    <!-- Button pour tester la console en dehors d'AR -->
-    <button id="test-console-btn" style="position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 10px; background: #007acc; color: white; border: none; border-radius: 5px; cursor: pointer;">
-      Test Console
-    </button>
 
 <style>
   body {
@@ -37,121 +32,167 @@
   
   #renderCanvas {
     width: 100vw;
-    height: 100vh;
+    height: 70vh; /* Réduction à 70% pour laisser de la place à la console */
     display: block;
   }
   
-  /* Style pour la console DOM Overlay */
-  #xr-console {
-    position: fixed;
-    bottom: 16px;
-    left: 16px;
-    width: min(90vw, 400px);
-    max-height: 300px;
-    background: rgba(0, 0, 0, 0.85);
-    color: #00ff00;
-    border-radius: 8px;
-    backdrop-filter: blur(4px);
-    overflow: hidden;
-    z-index: 999999;
-    font-family: 'Courier New', monospace;
-    border: 1px solid rgba(0, 255, 0, 0.3);
-  }
-  
-  #xr-console-header {
+  /* Console de debug fixe */
+  #debug-console {
+    width: 100vw;
+    height: 30vh; /* Utilise les 30% restants */
+    background: #1a1a1a;
+    border-top: 2px solid #333;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    background: rgba(0, 255, 0, 0.1);
-    border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+    flex-direction: column;
+    font-family: 'Courier New', monospace;
   }
   
-  #xr-clear {
-    padding: 4px 8px;
-    border: 1px solid rgba(0, 255, 0, 0.5);
-    border-radius: 4px;
-    background: transparent;
+  #console-header {
+    background: #2d2d2d;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    flex-shrink: 0;
+  }
+  
+  #console-title {
     color: #00ff00;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  #clear-btn {
+    background: #007acc;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
-    transition: all 0.2s;
+    transition: background 0.2s;
   }
   
-  #xr-clear:hover {
-    background: rgba(0, 255, 0, 0.2);
+  #clear-btn:hover {
+    background: #005a9e;
   }
   
-  #xr-title {
-    font-size: 12px;
-    font-weight: bold;
-    color: #00ff00;
-  }
-  
-  #xr-log {
-    margin: 0;
-    padding: 10px;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    line-height: 1.4;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 250px;
+  #console-content {
+    flex: 1;
+    padding: 12px;
     overflow-y: auto;
-    color: #00ff00;
-    background: transparent;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #ffffff;
+    background: #1a1a1a;
   }
   
-  /* Scrollbar personnalisée pour la console */
-  #xr-log::-webkit-scrollbar {
-    width: 6px;
+  /* Scrollbar pour la console */
+  #console-content::-webkit-scrollbar {
+    width: 8px;
   }
   
-  #xr-log::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
+  #console-content::-webkit-scrollbar-track {
+    background: #2d2d2d;
   }
   
-  #xr-log::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 0, 0.5);
-    border-radius: 3px;
+  #console-content::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+  }
+  
+  #console-content::-webkit-scrollbar-thumb:hover {
+    background: #777;
   }
   
   /* Styles pour les différents types de logs */
-  .log-error {
-    color: #ff4444 !important;
-  }
-  
-  .log-warn {
-    color: #ffaa00 !important;
+  .log-entry {
+    margin: 2px 0;
+    padding: 2px 0;
+    word-wrap: break-word;
   }
   
   .log-info {
-    color: #00aaff !important;
+    color: #00aaff;
+  }
+  
+  .log-warn {
+    color: #ffaa00;
+  }
+  
+  .log-error {
+    color: #ff4444;
+  }
+  
+  .log-success {
+    color: #00ff88;
+  }
+  
+  .timestamp {
+    color: #888;
+    font-size: 11px;
   }
 </style>
 
     <script>
-      // Script pour tester la console avant l'AR
-      document.addEventListener('DOMContentLoaded', () => {
-        const testBtn = document.getElementById('test-console-btn');
-        const consoleEl = document.getElementById('xr-console');
+      // Console de debug intégrée
+      let consoleContent;
+      let originalLog, originalWarn, originalError;
+      
+      function initDebugConsole() {
+        consoleContent = document.getElementById('console-content');
+        const clearBtn = document.getElementById('clear-btn');
         
-        if (testBtn && consoleEl) {
-          testBtn.addEventListener('click', () => {
-            // Toggle de la console pour test
-            if (consoleEl.style.display === 'none' || !consoleEl.style.display) {
-              consoleEl.style.display = 'block';
-              testBtn.textContent = 'Hide Console';
-              console.log('Console de test activée');
-              console.warn('Ceci est un test d\'avertissement');
-              console.error('Ceci est un test d\'erreur');
-            } else {
-              consoleEl.style.display = 'none';
-              testBtn.textContent = 'Test Console';
-            }
-          });
-        }
-      });
+        // Sauvegarder les méthodes originales
+        originalLog = console.log;
+        originalWarn = console.warn;
+        originalError = console.error;
+        
+        // Override des méthodes console
+        console.log = (...args) => {
+          originalLog(...args);
+          addLogEntry('info', args.join(' '));
+        };
+        
+        console.warn = (...args) => {
+          originalWarn(...args);
+          addLogEntry('warn', args.join(' '));
+        };
+        
+        console.error = (...args) => {
+          originalError(...args);
+          addLogEntry('error', args.join(' '));
+        };
+        
+        // Bouton clear
+        clearBtn.addEventListener('click', () => {
+          consoleContent.innerHTML = '';
+        });
+        
+        // Message d'initialisation
+        addLogEntry('success', 'Console de debug initialisée');
+      }
+      
+      function addLogEntry(type, message) {
+        if (!consoleContent) return;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+        
+        consoleContent.appendChild(entry);
+        consoleContent.scrollTop = consoleContent.scrollHeight;
+      }
+      
+      // Fonction globale pour logger depuis le code JS
+      window.debugLog = (message, type = 'info') => {
+        addLogEntry(type, message);
+      };
+      
+      // Initialiser quand le DOM est prêt
+      document.addEventListener('DOMContentLoaded', initDebugConsole);
     </script>
     
     <script type="module" src="/main.js"></script>

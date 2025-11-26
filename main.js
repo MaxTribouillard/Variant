@@ -4,54 +4,12 @@ var engine, scene, engineMat, mats, canvas = null;
 let placed, placeRequest = false;
 let time = 0;
 
-// Console de debug pour WebXR AR
-let arConsole = null;
-
-function initARConsole() {
-  // Créer la console de debug si elle n'existe pas
-  if (!document.getElementById("ar-debug-console")) {
-    const console = document.createElement("div");
-    console.id = "ar-debug-console";
-    console.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      width: 300px;
-      height: 200px;
-      background: rgba(0,0,0,0.8);
-      color: #00ff00;
-      font-family: monospace;
-      font-size: 12px;
-      border-radius: 5px;
-      padding: 10px;
-      overflow-y: auto;
-      z-index: 999999;
-      display: none;
-      border: 1px solid #333;
-    `;
-    document.body.appendChild(console);
-    arConsole = console;
-  }
-  return arConsole;
-}
-
-function logToAR(message) {
-  if (!arConsole) return;
-  const timestamp = new Date().toLocaleTimeString();
-  arConsole.innerHTML += `[${timestamp}] ${message}<br>`;
-  arConsole.scrollTop = arConsole.scrollHeight;
-}
-
-function showARConsole() {
-  if (arConsole) {
-    arConsole.style.display = "block";
-    logToAR("Console AR activée");
-  }
-}
-
-function hideARConsole() {
-  if (arConsole) {
-    arConsole.style.display = "none";
+// Console de debug - utilise la console fixe en bas de l'écran
+function debugLog(message, type = 'info') {
+  if (window.debugLog) {
+    window.debugLog(message, type);
+  } else {
+    console.log(message);
   }
 }
 
@@ -72,8 +30,7 @@ if ("xr" in navigator) {
 const init = async () => {
   canvas = document.getElementById("renderCanvas");
 
-  // Initialiser la console AR
-  initARConsole();
+  debugLog("Initialisation de Babylon.js...", 'info');
 
   engine = new BABYLON.Engine(canvas, true, {
     preserveDrawingBuffer: true,
@@ -124,12 +81,13 @@ const createScene = async () => {
   // Default intensity is 1. Let's dim the light a small amount
   light.intensity = 0.5;
 
+  debugLog("Configuration WebXR AR...", 'info');
+  
   var xr = await scene.createDefaultXRExperienceAsync({
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: ["hit-test", "anchors", "dom-overlay"],
-    domOverlay: { root: document.body }
+    optionalFeatures: ["hit-test", "anchors"]
   });
 
   // remove VR laser pointers for AR
@@ -143,10 +101,11 @@ const createScene = async () => {
   const hitTest = fm.enableFeature(BABYLON.WebXRHitTest, "latest");
   const anchorSystem = fm.enableFeature(
     BABYLON.WebXRAnchorSystem,
-    "latest"
+    "latest",
+    { doNotRemoveAnchorsOnSessionEnded: true }
   );
 
-  console.log("test")
+  debugLog("Hit test et anchors activés", 'success');
 
   let lastHitTest;
   let placed = false;
@@ -155,101 +114,45 @@ const createScene = async () => {
 
   var box = BABYLON.MeshBuilder.CreateBox("box", { size: 0.5 }, scene);
   box.rotationQuaternion = new BABYLON.Quaternion();
+  box.isVisible = false;
+  box.parent = root;
 
   hitTest.onHitTestResultObservable.add((results) => {
     if (results.length) {
+      results[0].transformationMatrix.decompose(
+        root.scaling,
+        root.rotationQuaternion,
+        root.position
+      );
       lastHitTest = results[0];
-      if(!placed){
-
-        results[0].transformationMatrix.decompose(
-          box.scaling,
-          box.rotationQuaternion,
-          box.position
-        );
-
-      }
-    } 
-    else {
+    } else {
       // no results
     }
   });
 
-  // ---- DOM OVERLAY CONSOLE ----
-  // Vérifier que les éléments DOM existent
-  const consoleEl = document.getElementById("xr-console");
-  const logEl = document.getElementById("xr-log");
-  const clearBtn = document.getElementById("xr-clear");
+  anchorSystem.onAnchorAddedObservable.add((anchor) => {
+    debugLog("Anchor ajouté!", 'success');
+    anchor.attachedNode = box;
+    box.isVisible = true;
+  });
 
-  if (!consoleEl || !logEl || !clearBtn) {
-    console.error("Éléments de console manquants dans le DOM");
-    return;
-  }
-
-  // buffer + rendu
-  let buffer = [];
-  const maxLines = 300;
-  let pending = false;
-
-  function renderLogs() {
-    pending = false;
-    if (logEl) {
-      logEl.textContent = buffer.join("\n");
-      // auto-scroll en bas
-      logEl.scrollTop = logEl.scrollHeight;
+  document.addEventListener("pointerdown", () => {
+    if (lastHitTest) {
+      debugLog("Tentative de placement d'anchor...", 'info');
+      anchorSystem.addAnchorPointUsingHitTestResultAsync(lastHitTest);
     }
-  }
-
-  // patch console.log/warn/error
-  const origLog = console.log, origWarn = console.warn, origErr = console.error;
-
-  function pushLine(tag, args) {
-    const ts = new Date().toISOString().split("T")[1].replace("Z", "");
-    const txt = args.map(a => {
-      try { 
-        return typeof a === "object" ? JSON.stringify(a) : String(a); 
-      } catch { 
-        return String(a); 
-      }
-    }).join(" ");
-    buffer.push(`[${ts}] ${tag}: ${txt}`);
-    if (buffer.length > maxLines) buffer.splice(0, buffer.length - maxLines);
-    // throttle pour ne pas rerendre à chaque log
-    if (!pending) {
-      pending = true;
-      requestAnimationFrame(renderLogs);
-    }
-  }
-
-  console.log = (...args) => { origLog(...args); pushLine("LOG", args); };
-  console.warn = (...args) => { origWarn(...args); pushLine("WARN", args); };
-  console.error = (...args) => { origErr(...args); pushLine("ERROR", args); };
-
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => { buffer = []; renderLogs(); });
-  }
+  });
 
   // Gestion des sessions XR
   xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
-    console.log("Session AR initiée");
-    logToAR("Session WebXR AR démarrée");
-    showARConsole();
-    
-    if (consoleEl) {
-      consoleEl.style.display = "block";
-    }
+    debugLog("Session WebXR AR démarrée", 'success');
   });
 
   xr.baseExperience.sessionManager.onXRSessionEnded.add(() => {
-    console.log("Session AR terminée");
-    logToAR("Session WebXR AR terminée");
-    hideARConsole();
-    
-    if (consoleEl) {
-      consoleEl.style.display = "none";
-    }
+    debugLog("Session WebXR AR terminée", 'warn');
   });
 
-  console.log("Console AR (DOM overlay) initialisée");
+  debugLog("Scene WebXR configurée avec succès", 'success');
   
 
 //     var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");

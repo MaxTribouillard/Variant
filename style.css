@@ -7,6 +7,6 @@ html, body {
 
 #renderCanvas {
   width: 100%;
-  height: 100%;
+  height: 70%; /* Cohérent avec le HTML */
   touch-action: none;
 }
