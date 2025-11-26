@@ -87,7 +87,8 @@ const createScene = async () => {
     uiOptions: {
       sessionMode: "immersive-ar",
     },
-    optionalFeatures: ["hit-test", "anchors"]
+    optionalFeatures: ["hit-test", "anchors", "dom-overlay"],
+    domOverlay: { root: document.getElementById("debug-console") }
   });
 
   // remove VR laser pointers for AR
@@ -143,9 +144,16 @@ const createScene = async () => {
     }
   });
 
+  // Vérifier si DOM overlay est supporté
+  if (xr.baseExperience.featuresManager.getEnabledFeature("xr-dom-overlay")) {
+    debugLog("DOM Overlay activé - console visible en AR", 'success');
+  } else {
+    debugLog("DOM Overlay non supporté", 'warn');
+  }
+
   // Gestion des sessions XR
   xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
-    debugLog("Session WebXR AR démarrée", 'success');
+    debugLog("Session WebXR AR démarrée - Console devrait être visible", 'success');
   });
 
   xr.baseExperience.sessionManager.onXRSessionEnded.add(() => {
