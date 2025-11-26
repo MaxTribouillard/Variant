@@ -76,13 +76,13 @@ const createScene = async () => {
 plane.position = new BABYLON.Vector3(0, 0, 2); // 2 mètres devant la caméra
 
 // Crée un GUI pour le texte
-const advancedTextur = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
 const logText = new BABYLON.GUI.TextBlock();
 logText.text = "Logs:\n";
 logText.color = "white";
 logText.fontSize = 20;
 logText.textWrapping = true;
-advancedTextur.addControl(logText);
+advancedTexture.addControl(logText);
 
 // Fonction pour ajouter du texte
 function log(message) {
@@ -142,14 +142,14 @@ function log(message) {
 
   
 
- var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+//  var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-    var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Click Me");
-    button.width = 0.2;
-    button.height = "40px";
-    button.color = "white";
-    button.background = "green";
-    advancedTexture.addControl(button); 
+//     var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Click Me");
+//     button.width = 0.2;
+//     button.height = "40px";
+//     button.color = "white";
+//     button.background = "green";
+//     advancedTexture.addControl(button); 
     
     anchorSystem.onAnchorAddedObservable.add((anchor) => {
           anchor.attachedNode = box;
