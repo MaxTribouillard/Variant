@@ -1,7 +1,7 @@
 // === LOG HUD DOM ELEMENT ===
 const logHud = document.createElement("div");
 logHud.style.position = "fixed";
-logHud.style.bottom = "0";
+logHud.style.top = "0";
 logHud.style.left = "0";
 logHud.style.width = "100%";
 logHud.style.maxHeight = "40%";
