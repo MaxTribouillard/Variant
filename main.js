@@ -1,28 +1,41 @@
-window.addEventListener("load", () => {
-  (function () {
-    const sendLog = (type, args) => {
-      fetch("https://webhook.site/fa590317-308e-461a-b301-be73de3b96c7", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type,
-          message: args.map(a => (typeof a === "object" ? JSON.stringify(a) : a)),
-          time: new Date().toISOString(),
-          userAgent: navigator.userAgent
-        }),
-      });
-    };
+// === LOG HUD DOM ELEMENT ===
+const logHud = document.createElement("div");
+logHud.style.position = "fixed";
+logHud.style.bottom = "0";
+logHud.style.left = "0";
+logHud.style.width = "100%";
+logHud.style.maxHeight = "40%";
+logHud.style.overflowY = "auto";
+logHud.style.background = "rgba(0,0,0,0.7)";
+logHud.style.color = "lime";
+logHud.style.fontSize = "12px";
+logHud.style.padding = "8px";
+logHud.style.fontFamily = "monospace";
+logHud.style.zIndex = "999999";
+document.body.appendChild(logHud);
 
-    const originalLog = console.log;
-    console.log = (...args) => {
-      originalLog(...args);
-      sendLog("log", args);
-    };
+// append message
+function hudLog(...args) {
+  const line = document.createElement("div");
+  line.textContent = args.map(a => typeof a === "object" ? JSON.stringify(a) : a).join(" ");
+  logHud.appendChild(line);
+  logHud.scrollTop = logHud.scrollHeight;
+}
 
-    console.log("Logger started on iOS");
-    console.log("Device UA:", navigator.userAgent);
-  })();
-});
+// override console
+const originalLog = console.log;
+console.log = (...args) => { originalLog(...args); hudLog("[LOG]", ...args); };
+
+const originalErr = console.error;
+console.error = (...args) => { originalErr(...args); hudLog("[ERROR]", ...args); };
+
+const originalWarn = console.warn;
+console.warn = (...args) => { originalWarn(...args); hudLog("[WARN]", ...args); };
+
+window.onerror = function(msg, url, line) {
+  hudLog("[ONERROR]", msg, url, line);
+};
+
 
 var engine, scene, engineMat, mats, canvas = null;
 let placed, placeRequest = false;
