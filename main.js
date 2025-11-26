@@ -11,7 +11,10 @@
           userAgent: navigator.userAgent
         }),
       });
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+      
+    }
   };
 
   const originalLog = console.log;
